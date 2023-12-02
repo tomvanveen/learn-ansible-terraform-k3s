@@ -1,0 +1,41 @@
+- name: Playbook for creating a Ubuntu cloud-init template
+  hosts: proxmox
+  vars:
+    envs:
+      STORAGE_POOL: local-zfs
+      VM_ID: 10000
+      VM_NAME: ubuntu-20.04-cloudimg
+
+  tasks:
+   - name: Download focal cloud image and check (md5)
+     ansible.builtin.get_url:
+       url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+       dest: /root
+       checksum: md5:58ce5098e7d346494a73e5265baa5a89
+
+   - name: Update apt and install libguestfs-tools
+     apt:
+      #  upgrade: yes
+       name: libguestfs-tools
+       state: present
+       update_cache: yes
+       cache_valid_time: 86400 #One day
+
+   - name: Install qemu-guest agent into image
+     shell: virt-customize -a focal-server-cloudimg-amd64.img --install qemu-guest-agent
+
+   - name: Create Proxmox VM image from Ubuntu Cloud Image
+     shell: |
+      qm create $VM_ID --memory 2048 --net0 virtio,bridge=vmbr0
+      qm importdisk $VM_ID focal-server-cloudimg-amd64.img $STORAGE_POOL
+      qm set $VM_ID --scsihw virtio-scsi-pci --scsi0 $STORAGE_POOL:vm-$VM_ID-disk-0
+      qm set $VM_ID --agent enabled=1,fstrim_cloned_disks=1
+      qm set $VM_ID --name $VM_NAME
+     environment: "{{ envs }}"
+
+   - name: Create Cloud-Init Disk and configure boot.
+     shell: |
+      qm set $VM_ID --ide2 $STORAGE_POOL:cloudinit
+      qm set $VM_ID --boot c --bootdisk scsi0
+      qm set $VM_ID --serial0 socket --vga serial0
+     environment: "{{ envs }}"
