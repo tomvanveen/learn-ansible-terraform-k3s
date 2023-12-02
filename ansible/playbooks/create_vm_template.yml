@@ -1,17 +1,21 @@
 - name: Playbook for creating a Ubuntu cloud-init template
   hosts: proxmox
   vars:
+    image: jammy
     envs:
+      #Set your storage pool (ex. local-lvm,local-zfs)
       STORAGE_POOL: local-zfs
+      #Set the vm id
       VM_ID: 10000
+      #Set the vm name
       VM_NAME: ubuntu-20.04-cloudimg
 
   tasks:
    - name: Download focal cloud image and check (md5)
      ansible.builtin.get_url:
-       url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+       url: 'https://cloud-images.ubuntu.com/{{ image }}/current/{{ image }}-server-cloudimg-amd64.img'
        dest: /root
-       checksum: md5:58ce5098e7d346494a73e5265baa5a89
+       checksum: md5:f9bcc864c08ac20edd33e0e9a3d3b2d9
 
    - name: Update apt and install libguestfs-tools
      apt:
