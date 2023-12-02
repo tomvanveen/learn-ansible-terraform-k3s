@@ -5,3 +5,4 @@ inventory.yml
 
 *.tfstate
 *.tfstate.backup
+*.hcl
