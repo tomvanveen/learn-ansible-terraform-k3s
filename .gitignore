@@ -1,2 +1,7 @@
 # ignore inventory.yml
 inventory.yml
+
+# ignore TF state
+
+*.tfstate
+*.tfstate.backup

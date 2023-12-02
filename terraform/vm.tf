@@ -2,7 +2,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm1" {
   name          = "yoshi"
   desc          = "A test using terraform and cloudinit"
   target_node   = "pve"
-  clone         = "ubuntu-cloud"
+  clone         = var.vm-name
 
 # The destination resource pool for the new VM
 #  pool         = "pool0"
@@ -41,7 +41,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm2" {
   name          = "bowser"
   desc          = "A test using terraform and cloudinit"
   target_node   = "pve"
-  clone         = "ubuntu-cloud"
+  clone         = var.vm-name
 
 # The destination resource pool for the new VM
 #  pool         = "pool0"
@@ -80,7 +80,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm3" {
   name          = "mario"
   desc          = "A test using terraform and cloudinit"
   target_node   = "pve"
-  clone         = "ubuntu-cloud"
+  clone         = var.vm-name
 
 # The destination resource pool for the new VM
 #  pool         = "pool0"
