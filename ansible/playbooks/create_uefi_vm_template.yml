@@ -1,0 +1,54 @@
+- name: Playbook for creating a Ubuntu cloud-init template
+  hosts: proxmox
+  vars:
+    #Change the image
+    image_version: jammy
+    #Change the image location
+    image_location: /var/lib/vz/template/iso
+    envs:
+      #Set your storage pool (ex. local-lvm,local-zfs)
+      STORAGE_POOL: local-zfs
+      #Set the vm id
+      VM_ID: 10001
+      #Set the vm name
+      VM_NAME: 'ubuntu-{{ image_version }}-uefi-cloudimg'
+
+  tasks:
+   - name: Download {{ image_version }} cloud image and check (md5)
+     ansible.builtin.get_url:
+       url: 'https://cloud-images.ubuntu.com/{{ image_version }}/current/{{ image_version }}-server-cloudimg-amd64.img'
+       dest: '{{ image_location }}'
+      #  checksum: md5:f9bcc864c08ac20edd33e0e9a3d3b2d9
+
+   - name: Update apt and install libguestfs-tools
+     apt:
+      #  upgrade: yes
+       name: libguestfs-tools
+       state: present
+       update_cache: yes
+       cache_valid_time: 86400 #One day
+
+   - name: Install qemu-guest agent into image
+     shell: virt-customize -a {{ image_location }}/{{ image_version}}-server-cloudimg-amd64.img --install qemu-guest-agent
+
+   - name: Create Proxmox VM image from Ubuntu Cloud Image
+     shell: |
+      qm create $VM_ID --memory 2048 --net0 virtio,bridge=vmbr0 --bios ovmf
+      qm importdisk $VM_ID {{ image_location }}/{{ image_version}}-server-cloudimg-amd64.img $STORAGE_POOL
+      qm set $VM_ID --scsihw virtio-scsi-pci --scsi0 $STORAGE_POOL:vm-$VM_ID-disk-0
+      qm set $VM_ID --agent enabled=1,fstrim_cloned_disks=1
+      qm set $VM_ID --name $VM_NAME
+     environment: "{{ envs }}"
+
+   - name: Create Cloud-Init Disk and configure boot.
+     shell: |
+      qm set $VM_ID --ide2 $STORAGE_POOL:cloudinit
+      qm set $VM_ID --boot c --bootdisk scsi0
+      qm set $VM_ID --serial0 socket --vga serial0
+     environment: "{{ envs }}"
+
+   - name: Add EFI disk
+     shell: |
+      qm set $VM_ID --efidisk0 local-zfs:0,efitype=4m,pre-enrolled-keys=1,size=1M
+     environment: "{{ envs }}"
+
