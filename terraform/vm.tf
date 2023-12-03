@@ -9,6 +9,8 @@ resource "proxmox_vm_qemu" "cloudinit-vm1" {
 
 # Activate QEMU agent for this VM
   agent = 1
+  
+  bios = "ovmf"
 
   cores   = 2
   sockets = 1
@@ -49,6 +51,8 @@ resource "proxmox_vm_qemu" "cloudinit-vm2" {
 # Activate QEMU agent for this VM
   agent = 1
 
+   bios = "ovmf"
+
   cores   = 2
   sockets = 1
   memory  = 4096
@@ -87,6 +91,8 @@ resource "proxmox_vm_qemu" "cloudinit-vm3" {
 
 # Activate QEMU agent for this VM
   agent = 1
+
+ bios = "ovmf"  
 
   cores   = 2
   sockets = 1
