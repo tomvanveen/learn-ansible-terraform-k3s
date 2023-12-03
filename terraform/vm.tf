@@ -32,7 +32,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm1" {
         # tag = 256
     }
 
-    ipconfig0 = "dhcp"
+    ipconfig0 = "ip=dhcp"
 
 
 }
@@ -71,7 +71,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm2" {
         # tag = 256
     }
 
-    ipconfig0 = "dhcp"
+    ipconfig0 = "ip=dhcp"
 
 
 }
@@ -110,7 +110,7 @@ resource "proxmox_vm_qemu" "cloudinit-vm3" {
         # tag = 256
     }
 
-    ipconfig0 = "dhcp"
+    ipconfig0 = "ip=dhcp"
 
 
 }
