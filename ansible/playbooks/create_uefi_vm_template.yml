@@ -33,7 +33,7 @@
 
    - name: Create Proxmox VM image from Ubuntu Cloud Image
      shell: |
-      qm create $VM_ID --memory 2048 --net0 virtio,bridge=vmbr0 --bios ovmf
+      qm create $VM_ID --memory 2048 --net0 virtio,bridge=vmbr0 --bios ovmf --machine q35
       qm importdisk $VM_ID {{ image_location }}/{{ image_version}}-server-cloudimg-amd64.img $STORAGE_POOL
       qm set $VM_ID --scsihw virtio-scsi-pci --scsi0 $STORAGE_POOL:vm-$VM_ID-disk-0
       qm set $VM_ID --agent enabled=1,fstrim_cloned_disks=1
