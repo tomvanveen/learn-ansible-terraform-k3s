@@ -14,11 +14,11 @@
       VM_NAME: 'ubuntu-{{ image_version }}-uefi-cloudimg'
 
   tasks:
-   - name: Download {{ image_version }} cloud image and check (md5)
+   - name: Download {{ image_version }} cloud image and check file integrity
      ansible.builtin.get_url:
        url: 'https://cloud-images.ubuntu.com/{{ image_version }}/current/{{ image_version }}-server-cloudimg-amd64.img'
        dest: '{{ image_location }}'
-      #  checksum: md5:f9bcc864c08ac20edd33e0e9a3d3b2d9
+       checksum: "sha256:https://cloud-images.ubuntu.com/{{ image_version }}/current/SHA256SUMS"
 
    - name: Update apt and install libguestfs-tools
      apt:
