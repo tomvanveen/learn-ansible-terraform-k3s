@@ -1,5 +1,5 @@
 - name: Playbook for creating a Ubuntu cloud-init template
-  hosts: proxmox
+  hosts: rome
   vars:
     #Change the image
     image_version: jammy
@@ -7,19 +7,13 @@
     image_location: /var/lib/vz/template/iso
     envs:
       #Set your storage pool (ex. local-lvm,local-zfs)
-      STORAGE_POOL: local-zfs
+      STORAGE_POOL: VM
       #Set the vm id
       VM_ID: 10001
       #Set the vm name
       VM_NAME: 'ubuntu-{{ image_version }}-uefi-cloudimg'
 
   tasks:
-   - name: Download {{ image_version }} cloud image and check file integrity
-     ansible.builtin.get_url:
-       url: 'https://cloud-images.ubuntu.com/{{ image_version }}/current/{{ image_version }}-server-cloudimg-amd64.img'
-       dest: '{{ image_location }}'
-       checksum: "sha256:https://cloud-images.ubuntu.com/{{ image_version }}/current/SHA256SUMS"
-
    - name: Update apt and install libguestfs-tools
      apt:
       #  upgrade: yes
@@ -27,6 +21,12 @@
        state: present
        update_cache: yes
        cache_valid_time: 86400 #One day
+
+   - name: Download {{ image_version }} cloud image and check file integrity
+     ansible.builtin.get_url:
+       url: 'https://cloud-images.ubuntu.com/{{ image_version }}/current/{{ image_version }}-server-cloudimg-amd64.img'
+       dest: '{{ image_location }}'
+       checksum: "sha256:https://cloud-images.ubuntu.com/{{ image_version }}/current/SHA256SUMS"
 
    - name: Install qemu-guest agent into image
      shell: virt-customize -a {{ image_location }}/{{ image_version}}-server-cloudimg-amd64.img --install qemu-guest-agent
@@ -49,6 +49,14 @@
 
    - name: Add EFI disk
      shell: |
-      qm set $VM_ID --efidisk0 local-zfs:0,efitype=4m,pre-enrolled-keys=1,size=1M
+      qm set $VM_ID --efidisk0 $STORAGE_POOL:0,efitype=4m,pre-enrolled-keys=1,size=1M
      environment: "{{ envs }}"
+
+   - name: Setting config options
+     shell: |
+      qm set $VM_ID --ciuser "serveradmin"
+      qm set $VM_ID --sshkeys ".ssh/authorized_keys"
+     environment: "{{ envs }}"
+
+
 
