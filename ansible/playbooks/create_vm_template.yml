@@ -9,7 +9,7 @@
       #Set your storage pool (ex. local-lvm,local-zfs)
       STORAGE_POOL: VM
       #Set the vm id
-      VM_ID: 10001
+      VM_ID: 10000
       #Set the vm name
       VM_NAME: 'ubuntu-{{ image_version }}-uefi-cloudimg'
 
