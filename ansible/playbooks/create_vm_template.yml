@@ -25,7 +25,7 @@
    - name: Download {{ image_version }} cloud image and check file integrity
      ansible.builtin.get_url:
        url: 'https://cloud-images.ubuntu.com/{{ image_version }}/current/{{ image_version }}-server-cloudimg-amd64.img'
-       dest: '{{ image_location }}'
+       dest: '{{ image_location }}/{{ image_version }}-server-cloudimg-amd64.img'
        checksum: "sha256:https://cloud-images.ubuntu.com/{{ image_version }}/current/SHA256SUMS"
 
    - name: Install qemu-guest agent into image
